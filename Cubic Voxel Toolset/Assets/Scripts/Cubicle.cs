@@ -15,5 +15,5 @@ public class Cubicle
         this.coordinates = coordinates;
         this.colorRGBA = colorRGBA;
         faces = new bool[6];
-    } 
+    }
 }
