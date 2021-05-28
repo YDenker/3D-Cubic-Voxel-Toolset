@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Test
   m_EditorClassIdentifier: 
   objectName: Test
-  prefab: {fileID: 3443431662648532195, guid: dce2360559eecae48b4dd9ec9201df74, type: 3}
+  prefab: {fileID: 1740948218, guid: bb1b2b6241488df43863f53652549905, type: 3}
