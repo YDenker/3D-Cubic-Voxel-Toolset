@@ -3,7 +3,10 @@ guid: a58875213d132f14c9e873acd18da2c2
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - m_Target: {instanceID: 0}
+  - m_ToolIcon: {fileID: 10912, guid: 0000000000000000f000000000000000, type: 0}
+  - cubePrefab: {fileID: 4548494370247538617, guid: 3a50a484796002841a9ad65d61c6fa64, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

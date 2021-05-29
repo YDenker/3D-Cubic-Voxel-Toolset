@@ -8,9 +8,12 @@ using UnityEditor.EditorTools;
 public class MeshEditorTool : EditorTool
 {
     [SerializeField]
-    Texture2D m_ToolIcon;
+    private Texture2D m_ToolIcon;
 
-    GUIContent m_IconContent;
+    private GUIContent m_IconContent;
+
+    [SerializeField]
+    private GameObject cubePrefab;
 
     private void OnEnable()
     {
@@ -22,22 +25,25 @@ public class MeshEditorTool : EditorTool
         };
     }
 
-    public override GUIContent toolbarIcon => base.toolbarIcon; // Can be own icon
-
-
+    public override GUIContent toolbarIcon => m_IconContent; // base.toolbarIcon
 
     public override void OnToolGUI(EditorWindow window)
+    {
+        MoveTool();
+    }
+
+    private void MoveTool()
     {
         EditorGUI.BeginChangeCheck();
 
         Vector3 position = new Vector3((int)Tools.handlePosition.x, (int)Tools.handlePosition.y, (int)Tools.handlePosition.z);
         float posX = Tools.handlePosition.x,
-            posY = Tools.handlePosition.y, 
+            posY = Tools.handlePosition.y,
             posZ = Tools.handlePosition.z;
 
-        using (new Handles.DrawingScope(Color.red)) 
+        using (new Handles.DrawingScope(Color.red))
         {
-            posX = (int)Handles.Slider(position, Vector3.right).x;           
+            posX = (int)Handles.Slider(position, Vector3.right).x;
         }
         using (new Handles.DrawingScope(Color.green))
         {
@@ -48,19 +54,22 @@ public class MeshEditorTool : EditorTool
             posZ = (int)Handles.Slider(position, Vector3.forward).z;
         }
 
-        position = new Vector3(posX,posY,posZ);
+        position = new Vector3(posX, Mathf.Max(0,posY), posZ);
 
         if (EditorGUI.EndChangeCheck())
         {
             Vector3 delta = position - Tools.handlePosition;
             Undo.RecordObjects(Selection.transforms, "Move Thing");
 
-            foreach( var transform in Selection.transforms)
+            foreach (var transform in Selection.transforms)
             {
-                transform.position += delta;
-                transform.gameObject.name = ((int)transform.position.x).ToString() + "|" + ((int)transform.position.y).ToString() + "|" + ((int)transform.position.z).ToString();
+                if (!transform.TryGetComponent<GridGizmos>(out GridGizmos gizmos))
+                {
+                    transform.position += delta;
+                    transform.gameObject.name = ((int)transform.position.x).ToString() + "|" + ((int)transform.position.y).ToString() + "|" + ((int)transform.position.z).ToString();
+                }
+                else Debug.LogWarning("You are trying to move the parent. To move the parent object is not allowed :)! Simply deselect the parent in the hierachy");
             }
         }
     }
-
 }

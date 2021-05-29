@@ -9,13 +9,15 @@ public class VoxelEditorWindow : EditorWindow
 
     public static string prefabsFolder ="Prefabs", saveStateFolder = "SaveStates";
 
-    private static string prefabsPath => "Assets/" + prefabsFolder + "/";
-    private static string saveStatePath => "Assets/" + saveStateFolder + "/";
+    public static string PrefabsPath => "Assets/" + prefabsFolder;
+    public static string SaveStatePath => "Assets/" + saveStateFolder;
 
     private ScriptableSaveState saveState;
 
     private string saveName = "NewObject";
     private GameObject parent;
+    
+    private bool showButtons = true; // Show New, Load, Save, Unload , Import and Export buttons
 
 
     [MenuItem("Tools/Voxel Editor")]
@@ -33,21 +35,31 @@ public class VoxelEditorWindow : EditorWindow
         int selectedCubes = Selection.count;
 
         // GUI LAYOUT
+        GUILayout.BeginHorizontal("box");
+        GUILayout.Label("Name: ", EditorStyles.label);
+        GUILayout.Label(saveName, EditorStyles.boldLabel);
+        GUILayout.EndHorizontal();
 
-        Space();
-        saveName = EditorGUILayout.TextField("Name",saveName);
-        Space();
-        if (GUILayout.Button("New")) New();
-        if (GUILayout.Button("Load")) Load();
-        if (GUILayout.Button("Save")) Save(); 
-        if (GUILayout.Button("Unload")) Unload();
+        showButtons = EditorGUILayout.Foldout(showButtons, "File");
+
+        if (showButtons)
+        {
+            GUILayout.BeginVertical("box");
+            if (GUILayout.Button("New")) New();
+            if (GUILayout.Button("Load")) Load();
+            if (GUILayout.Button("Save")) Save(); 
+            if (GUILayout.Button("Unload")) Unload();
+            if (GUILayout.Button("Import")) Import();
+            if (GUILayout.Button("Export")) Export();
+            GUILayout.EndVertical();
+        }
 
         GUILayout.FlexibleSpace();
 
         EditorGUILayout.HelpBox("This is only a prototype!", MessageType.Info);
         Space();
         GUILayout.Label("Debugs", EditorStyles.boldLabel);
-        GUILayout.Label("Currently Selected Cubes: "+ selectedCubes);
+        GUILayout.Label("Currently Selected Objects: "+ selectedCubes);
         GUILayout.Label("Currently Loaded SaveState:");
         EditorGUILayout.ObjectField(saveState, typeof(ScriptableSaveState), true);
         Space();
@@ -56,17 +68,21 @@ public class VoxelEditorWindow : EditorWindow
     private void New()
     {
         CheckFolderStructure();
-        if (NewObjectDialogs()) 
-        { 
-            // Remove previous object from scene
-            if (saveState) DestroyImmediate(parent);
+        NewWindow.CreateWizard(this);
+    }
 
-            // Create new SaveState instance
-            saveState = ScriptableObject.CreateInstance<ScriptableSaveState>();
+    public void New(string objectName)
+    {
+        saveName = objectName;
+        // Remove previous object from scene
+        if (saveState) DestroyImmediate(parent);
 
-            // Assign basic values to Instance
-            parent = new GameObject(saveName);
-        }
+        // Create new SaveState instance
+        saveState = ScriptableObject.CreateInstance<ScriptableSaveState>();
+
+        // Assign basic values to Instance
+        parent = new GameObject(saveName);
+        parent.AddComponent<GridGizmos>();
 
         EditorQuit.isLoaded = true;
     }
@@ -95,7 +111,7 @@ public class VoxelEditorWindow : EditorWindow
         CreateOrReplacePrefab();
 
         if (!AssetDatabase.Contains(saveState))
-        AssetDatabase.CreateAsset(saveState, saveStatePath + saveName + ".asset");
+        AssetDatabase.CreateAsset(saveState, SaveStatePath + "/"+saveName + ".asset");
 
         AssetDatabase.SaveAssets();
     }
@@ -108,15 +124,20 @@ public class VoxelEditorWindow : EditorWindow
             if (saveState) DestroyImmediate(parent);
             saveState = null;
             parent = null;
-            saveName = "NewObject";
+            saveName = "--------";
         }
         EditorSceneManager.SaveOpenScenes();
         EditorQuit.isLoaded = false;
     }
 
-    private bool NewObjectDialogs()
+    private void Export()
     {
-        return EditorUtility.DisplayDialog("Loose all current unsaved changes?", "Are you sure you want to create a new object with the name:\""+saveName+"\" to work on?\nAll unsaved changes to the current object will be lost!", "Yes create new", "Wait let me save first!");
+        Debug.LogWarning("This feature is not yet implemented");
+    }
+
+    private void Import()
+    {
+        Debug.LogWarning("This feature is not yet implemented");
     }
 
     private bool UnloadDialog()
@@ -136,13 +157,13 @@ public class VoxelEditorWindow : EditorWindow
             if (ChangedObjectNameOverrideDialog())
             {
                 UnusedPrefabs.Instance.Add(saveState.prefab);
-                AssetDatabase.RenameAsset(saveStatePath + saveState.prefab.name + ".asset", saveName);
+                AssetDatabase.RenameAsset(SaveStatePath +"/"+ saveState.prefab.name + ".asset", saveName);
             }
             else saveName = saveState.objectName;
             
         }
         saveState.objectName = saveName;
-        saveState.prefab = PrefabUtility.SaveAsPrefabAsset(parent,prefabsPath + saveName + ".prefab");
+        saveState.prefab = PrefabUtility.SaveAsPrefabAsset(parent,PrefabsPath +"/" + saveName + ".prefab");
     }
 
     private static void CheckFolderStructure()
