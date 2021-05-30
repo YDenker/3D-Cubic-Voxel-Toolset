@@ -81,7 +81,10 @@ public class VoxelEditorWindow : EditorWindow
         saveState = ScriptableObject.CreateInstance<ScriptableSaveState>();
 
         // Assign basic values to Instance
-        parent = new GameObject(saveName);
+        parent = new GameObject(saveName)
+        {
+            layer = LayerMask.NameToLayer("Ignore Raycast")
+        };
         parent.AddComponent<GridGizmos>();
 
         EditorQuit.isLoaded = true;
@@ -132,12 +135,12 @@ public class VoxelEditorWindow : EditorWindow
 
     private void Export()
     {
-        Debug.LogWarning("This feature is not yet implemented");
+        Debug.LogWarning("This feature is not implemented yet");
     }
 
     private void Import()
     {
-        Debug.LogWarning("This feature is not yet implemented");
+        Debug.LogWarning("This feature is not implemented yet");
     }
 
     private bool UnloadDialog()

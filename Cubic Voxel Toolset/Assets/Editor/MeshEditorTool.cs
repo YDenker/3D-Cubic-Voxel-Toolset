@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.EditorTools;
+using UnityEditorInternal;
 
 [EditorTool("Voxel Mesh Tool")]
 public class MeshEditorTool : EditorTool
@@ -15,6 +16,10 @@ public class MeshEditorTool : EditorTool
     [SerializeField]
     private GameObject cubePrefab;
 
+    private LayerMask tempLayermask;
+
+    public static bool IsActive { get; private set; }
+
     private void OnEnable()
     {
         m_IconContent = new GUIContent()
@@ -23,9 +28,43 @@ public class MeshEditorTool : EditorTool
             text = "Voxel Mesh Tool",
             tooltip = "To Add and Remove cubes from an existing Voxel Mesh"
         };
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+
+    public void OnDisable()
+    {
+        Tools.current = Tool.Move;
+        SceneView.duringSceneGui -= OnSceneGUI;
     }
 
     public override GUIContent toolbarIcon => m_IconContent; // base.toolbarIcon
+
+    private void OnSceneGUI(SceneView sceneview)
+    {
+        if (ToolManager.IsActiveTool(this) && !IsActive)
+        {
+            IsActive = true;
+            tempLayermask = Tools.lockedLayers;
+            Tools.lockedLayers = LayerMask.GetMask("Ignore Raycast");
+            return;
+        } else if (ToolManager.IsActiveTool(this)) 
+        {
+            // Do Stuff that happens only when the tool is active
+            Event e = Event.current;
+
+            if (e.isKey && e.character == 'a') Debug.Log("A");
+
+        } else if (IsActive)
+        {
+            IsActive = false;
+            Tools.lockedLayers = tempLayermask;
+        }
+
+
+        // Do Stuff that happens only when the tool is not active
+        
+        
+    }
 
     public override void OnToolGUI(EditorWindow window)
     {
