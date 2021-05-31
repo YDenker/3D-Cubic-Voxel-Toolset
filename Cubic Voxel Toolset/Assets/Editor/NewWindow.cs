@@ -37,7 +37,7 @@ public class NewWindow : ScriptableWizard
 
         GUILayout.FlexibleSpace();
 
-        EditorGUILayout.HelpBox("WARNING: All unsaved changes will be lost!", MessageType.Warning);
+        if(vew.Loaded) EditorGUILayout.HelpBox("WARNING: All unsaved changes to the current model will be lost!", MessageType.Warning);
 
         GUILayout.BeginHorizontal("box");
         if (GUILayout.Button("Create")) Create();

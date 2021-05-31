@@ -11,10 +11,9 @@ public class EditorQuit
     static bool Quit()
     {
         if (isLoaded)
-            return EditorUtility.DisplayDialog("Before You Quit!", "Before you quit, please unload the current Model you are working on!\nNot doing so can create problems in the future.", "Quit", "Cancle");
-        else
-            return true;
+            return EditorUtility.DisplayDialog("Before You Quit!", "All unsaved changes that you made on the current model will be lost.", "Quit", "Cancle");
 
+        return true;
     }
 
     static EditorQuit()

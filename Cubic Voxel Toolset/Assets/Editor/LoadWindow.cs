@@ -41,6 +41,8 @@ public class LoadWindow : ScriptableWizard
 
         GUILayout.FlexibleSpace();
 
+        if (vew.Loaded) EditorGUILayout.HelpBox("Warning: All unsaved changes to the current model will be lost!", MessageType.Warning);
+
         GUILayout.BeginHorizontal("box");
         if (GUILayout.Button("Load")) Load();
         if (GUILayout.Button("Back")) Close();
