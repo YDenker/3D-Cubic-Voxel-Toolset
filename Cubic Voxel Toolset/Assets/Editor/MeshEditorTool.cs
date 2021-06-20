@@ -31,9 +31,10 @@ public class MeshEditorTool : EditorTool
 
     // Raycast
 
+    private Ray ray;
     private RaycastHit hit;
     private bool mouseOver = false;
-    Vector3 centerCube = Vector3.zero;
+    private Vector3 centerCube = Vector3.zero;
 
 
     public ToggleGroup activeTool = new ToggleGroup(true);
@@ -109,7 +110,7 @@ public class MeshEditorTool : EditorTool
 
     private void MouseHover()
     {
-        Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+        ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
         mouseOver = Physics.Raycast(ray, out hit, 100f);
     }
 
@@ -167,9 +168,11 @@ public class MeshEditorTool : EditorTool
     private void AddTool()
     {
         Event e = Event.current;
+        
+        Vector3 temp = centerCube;
+
         if (mouseOver)
         {
-            Vector3 temp = centerCube;
             Vector3 hitpoint = hit.transform.position - hit.point;
 
             //Below
@@ -184,23 +187,35 @@ public class MeshEditorTool : EditorTool
             else if (hitpoint.z >= 0.5) centerCube = hit.transform.position - Vector3.forward;
             //Back  (+z)
             else if (hitpoint.z <= -0.5) centerCube = hit.transform.position + Vector3.forward;
-
-            if(centerCube.y >= 0f)
-            {
-                if (e.isMouse && e.type == EventType.MouseDown && e.button == 0)
-                {
-                    GameObject go = Instantiate(cubePrefab, centerCube, Quaternion.identity, VoxelEditorWindow.Instance.ModelParent.transform);
-                    go.name = ((int)centerCube.x).ToString() + "|" + ((int)centerCube.y).ToString() + "|" + ((int)centerCube.z).ToString();
-                }
-                using(new Handles.DrawingScope(Color.red))
-                {
-                    Handles.DrawWireCube(centerCube, Vector3.one);
-                }
-
-                if(!temp.Equals(centerCube))
-                    SceneView.RepaintAll();
-            }
         }
+        else
+        {
+            Vector3 origin = ray.origin;
+            Vector3 direction = ray.direction;
+
+
+            // Calculating hitpoint on the xz plane
+            float t = (0f - origin.y) / direction.y;
+            Vector3 point = new Vector3(Mathf.Ceil(origin.x + direction.x * t - 0.5f), 0f, Mathf.Ceil(origin.z + direction.z * t - 0.5f));
+
+            centerCube = point;
+        }
+        if (centerCube.y >= 0f)
+        {
+            if (e.isMouse && e.type == EventType.MouseDown && e.button == 0)
+            {
+                GameObject go = Instantiate(cubePrefab, centerCube, Quaternion.identity, VoxelEditorWindow.Instance.ModelParent.transform);
+                go.name = ((int)centerCube.x).ToString() + "|" + ((int)centerCube.y).ToString() + "|" + ((int)centerCube.z).ToString();
+            }
+            using(new Handles.DrawingScope(Color.red))
+            {
+                Handles.DrawWireCube(centerCube, Vector3.one);
+            }
+
+            if(!temp.Equals(centerCube))
+                SceneView.RepaintAll();
+        }
+
     }
 
     private void DeleteTool()
